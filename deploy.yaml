@@ -1,0 +1,51 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: version-deploy
+  labels:
+    app: version-deploy
+    version: red
+spec:
+  replicas: 1
+  selector:
+    app: version-deploy
+    version: red
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: version-deploy
+        version: red
+    spec:
+      containers:
+        - name: versioner
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          resources:
+            requests:
+             cpu: 50m
+          env:
+            - name: VERSION
+              value: "RED"
+          # image: carnsds/version-demo:latest
+          image: jonwoodlief/go-api:latest
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: version1-deploy
+    service: version-service
+  name: version-service
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: version-deploy
+  type: ClusterIP

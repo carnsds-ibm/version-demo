@@ -1,0 +1,32 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: version-deploy-blue
+  labels:
+    app: version-deploy
+    version: blue
+spec:
+  replicas: 1
+  selector:
+    app: version-deploy
+    version: blue
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: version-deploy
+        version: blue
+    spec:
+      containers:
+        - name: versioner
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          resources:
+            requests:
+             cpu: 50m
+          env:
+            - name: VERSION
+              value: "BLUE"
+          image: carnsds/version-demo:latest
